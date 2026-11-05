@@ -8,5 +8,6 @@ Changes:
 - The bar also shows on `/chat`, in place of the chat's own footer, whose tabs are all in
   the chat sidebar. Core leaves room for it below the chat (`footer-nav-visible`), and it
   steps aside while the keyboard is up.
-- Inside the chat, the chat button leads back to the forum with the `shuffle` icon, as
-  the AI bot button does from its conversations.
+- Inside the chat, the tab that opens it (Chat, Multi Tab, or a custom one to `/chat`)
+  leads back to the forum with the `shuffle` icon, as the AI bot button does from its
+  conversations.

@@ -7,6 +7,7 @@ import { and } from "truth-helpers";
 import dIcon from "discourse-common/helpers/d-icon";
 import { i18n } from "discourse-i18n";
 import formatAge from "discourse/helpers/format-age";
+import DiscourseURL from "discourse/lib/url";
 import MultiTabMessages from "../multi-tab/multi-tab-messages";
 import AllUnreadNotifications from "../notifications/all-unread";
 import ReviewableNotifications from "../notifications/reviewable";
@@ -16,6 +17,7 @@ import AiBot from "../ai-bot/ai-bot";
 
 export default class FNavItem extends Component {
   @service currentUser;
+  @service router;
 
   get isHome() {
     return this.args.tab?.function === "home";
@@ -73,7 +75,28 @@ export default class FNavItem extends Component {
     return this.args.tab?.destination;
   }
 
+  // The tab that opens the chat (its own, Multi Tab's messages-and-chat, or a custom one
+  // pointing at /chat) leads back to the forum from inside it, as the AI bot tab does
+  // from its conversations: the same shuffle icon, to the last page outside.
+  get exitsChat() {
+    const route = this.router.currentRouteName || "";
+    const inChat = route === "chat" || route.startsWith("chat.");
+    const opensChat =
+      this.isChat ||
+      this.isMulti ||
+      /^\/chat(\/|$)/.test(this.args.tab?.destination || "");
+    return inChat && opensChat;
+  }
+
+  exitChat = () => {
+    const chatState = getOwner(this).lookup("service:chat-state-manager");
+    DiscourseURL.routeTo(chatState?.lastKnownAppURL || "/");
+  };
+
   get clickHandler() {
+    if (this.exitsChat) {
+      return this.exitChat;
+    }
     if (this.isHome) {
       return this.args.onHomeClick;
     }
@@ -129,7 +152,9 @@ export default class FNavItem extends Component {
         data-destination={{this.destination}}
         {{on "click" this.clickHandler}}
       >
-        {{#if this.isHome}}
+        {{#if this.exitsChat}}
+          {{dIcon "shuffle"}}
+        {{else if this.isHome}}
           {{#if @isTopicRoute}}
             {{dIcon "angle-left"}}
           {{else}}
@@ -169,7 +194,9 @@ export default class FNavItem extends Component {
         {{/if}}
         {{#if this.showLabels}}
           <div class="tab-label">
-            {{#if (and this.isHome @isTopicRoute)}}
+            {{#if this.exitsChat}}
+              {{i18n "sidebar.back_to_forum"}}
+            {{else if (and this.isHome @isTopicRoute)}}
               {{i18n "js.back_button"}}
             {{else}}
               {{@tab.name}}

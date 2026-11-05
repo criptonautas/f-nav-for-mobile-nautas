@@ -75,7 +75,7 @@ hide_ai_bot_button:
   type: bool
   default: true
 svg_icons:
-  default: "angle-left|message"
+  default: "angle-left|message|shuffle"
   type: list
   list_type: "compact"
   description: "List of FontAwesome 6 icons used in this theme component"

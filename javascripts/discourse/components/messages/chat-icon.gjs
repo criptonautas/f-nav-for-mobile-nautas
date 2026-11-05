@@ -10,6 +10,7 @@ export default class ChatIcon extends Component {
   @service currentUser;
   @service site;
   @service chatStateManager;
+  @service router;
 
   get showUnreadIndicator() {
     return !this.currentUserInDnD;
@@ -25,16 +26,27 @@ export default class ChatIcon extends Component {
     return this.args.currentUserInDnD || this.currentUser.isInDoNotDisturb();
   }
 
+  // Inside the chat the button leads back to the forum, as the AI bot's does from its
+  // conversations (ai-bot.gjs): same icon, same idea.
+  get isInChat() {
+    const route = this.router.currentRouteName || "";
+    return route === "chat" || route.startsWith("chat.");
+  }
+
   get title() {
-    return i18n("chat.title_capitalized");
+    return i18n(
+      this.isInChat ? "sidebar.back_to_forum" : "chat.title_capitalized"
+    );
   }
 
   get icon() {
-    return "d-chat";
+    return this.isInChat ? "shuffle" : "d-chat";
   }
 
   get href() {
-    return getURL(this.chatStateManager.lastKnownChatURL || "/chat");
+    return this.isInChat
+      ? getURL(this.chatStateManager.lastKnownAppURL || "/")
+      : getURL(this.chatStateManager.lastKnownChatURL || "/chat");
   }
 
   <template>

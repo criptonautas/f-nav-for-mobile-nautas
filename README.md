@@ -11,3 +11,5 @@ Changes:
 - Inside the chat, the tab that opens it (Chat, Multi Tab, or a custom one to `/chat`)
   leads back to the forum with the `shuffle` icon, as the AI bot button does from its
   conversations.
+- A compose tab (function `compose`, or a tab pointing at `/new-topic`): replies inside a
+  topic the user can post in, opens a new topic elsewhere, in the category being viewed.

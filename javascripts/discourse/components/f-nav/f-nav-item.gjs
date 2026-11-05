@@ -16,6 +16,7 @@ import ChatIcon from "../messages/chat-icon";
 import AiBot from "../ai-bot/ai-bot";
 
 export default class FNavItem extends Component {
+  @service composer;
   @service currentUser;
   @service router;
 
@@ -93,7 +94,39 @@ export default class FNavItem extends Component {
     DiscourseURL.routeTo(chatState?.lastKnownAppURL || "/");
   };
 
+  // The compose tab (function "compose", or a custom tab pointing at /new-topic): a reply
+  // in a topic the user can post in, a new topic everywhere else, in the category being
+  // viewed. The composer service's own entry points, so drafts reopen as usual.
+  get isCompose() {
+    return (
+      this.args.tab?.function === "compose" ||
+      /^\/new-topic(\/|\?|$)/.test(this.args.tab?.destination || "")
+    );
+  }
+
+  get replyTopic() {
+    if (!this.args.isTopicRoute) {
+      return null;
+    }
+    const topic = getOwner(this).lookup("controller:topic")?.model;
+    return topic?.details?.can_create_post ? topic : null;
+  }
+
+  compose = () => {
+    const topic = this.replyTopic;
+    if (topic) {
+      this.composer.focusComposer({ topic });
+    } else {
+      this.composer.openNewTopic({
+        category: getOwner(this).lookup("service:discovery")?.category,
+      });
+    }
+  };
+
   get clickHandler() {
+    if (this.isCompose) {
+      return this.compose;
+    }
     if (this.exitsChat) {
       return this.exitChat;
     }
@@ -154,6 +187,8 @@ export default class FNavItem extends Component {
       >
         {{#if this.exitsChat}}
           {{dIcon "shuffle"}}
+        {{else if this.isCompose}}
+          {{dIcon (if this.replyTopic "reply" @tab.icon)}}
         {{else if this.isHome}}
           {{#if @isTopicRoute}}
             {{dIcon "angle-left"}}
@@ -196,6 +231,8 @@ export default class FNavItem extends Component {
           <div class="tab-label">
             {{#if this.exitsChat}}
               {{i18n "sidebar.back_to_forum"}}
+            {{else if (and this.isCompose this.replyTopic)}}
+              {{i18n "topic.reply.title"}}
             {{else if (and this.isHome @isTopicRoute)}}
               {{i18n "js.back_button"}}
             {{else}}

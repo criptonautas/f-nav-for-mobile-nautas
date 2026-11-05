@@ -1,7 +1,7 @@
 # F NAV for mobile (nautas)
 
 Fork of [VaperinaDEV/f-nav-for-mobile](https://github.com/VaperinaDEV/f-nav-for-mobile)
-for comunidad.criptonautas.co. Branch `nautas`.
+for comunidad.criptonautas.co.
 
 Changes:
 
